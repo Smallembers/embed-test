@@ -35,19 +35,14 @@
             position: relative;
         }
 
-        /* Wrap everything in a main container for easy visibility toggling */
+        /* Main container layout control */
         #main-app-container {
-            transition: opacity 0.15s ease, transform 0.15s ease;
-            opacity: 1;
-            transform: scale(1);
+            display: block;
         }
 
-        /* Class applied when the UI is hidden */
+        /* Clean hiding rule using display property instead of pointer-events */
         .hidden-ui {
-            opacity: 0 !important;
-            transform: scale(0.95) !important;
-            pointer-events: none; 
-            user-select: none;
+            display: none !important;
         }
 
         /* Low-profile floating button to reveal the UI when hidden */
@@ -63,19 +58,12 @@
             border-radius: 4px;
             cursor: pointer;
             z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.15s ease;
+            display: none; /* Hidden by default */
         }
         #floating-reveal-btn:hover {
             color: #ffffff;
             background-color: #2563eb;
             border-color: #3b82f6;
-        }
-        /* Show the floating button only when the main app is hidden */
-        .hidden-ui ~ #floating-reveal-btn {
-            opacity: 1;
-            pointer-events: auto;
         }
 
         .header-panel {
@@ -369,7 +357,13 @@
 
         // --- Toggle Visibility Logic ---
         function toggleUI() {
-            mainContainer.classList.toggle('hidden-ui');
+            if (mainContainer.classList.contains('hidden-ui')) {
+                mainContainer.classList.remove('hidden-ui');
+                floatingRevealBtn.style.display = 'none';
+            } else {
+                mainContainer.classList.add('hidden-ui');
+                floatingRevealBtn.style.display = 'block';
+            }
         }
 
         // Hide button click event
@@ -386,6 +380,215 @@
 
         // Hotkey trigger listener (Uses backtick / ` key)
         window.addEventListener('keydown', (e) => {
-            // Check if user is typing an actual '`' inside an input or textarea
+            // Check if user is typing inside an input or textarea
             if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
-                if (e.key ===
+                if (e.key === 'Escape') {
+                    document.activeElement.blur();
+                }
+                return;
+            }
+
+            // Detect backtick key
+            if (e.key === '`') {
+                e.preventDefault(); 
+                toggleUI();
+            }
+        });
+
+        // --- Persistent API Key Storage Management ---
+        let apiKeys = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
+
+        function saveKeys() {
+            localStorage.setItem('gemini_api_keys', JSON.stringify(apiKeys));
+            renderKeyList();
+        }
+
+        function renderKeyList() {
+            keyListEl.innerHTML = '';
+            if (apiKeys.length === 0) {
+                keyListEl.innerHTML = `<li style="font-size:12px; color:#a1a1aa; text-align:center;">No keys added yet. Add at least one above.</li>`;
+                return;
+            }
+            apiKeys.forEach((key, index) => {
+                const li = document.createElement('li');
+                li.className = 'key-item';
+                
+                const maskedKey = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+                const badgeText = index === 0 ? '<span class="badge primary">Primary</span>' : `<span class="badge">Fallback #${index}</span>`;
+                
+                li.innerHTML = `
+                    <div>${maskedKey} ${badgeText}</div>
+                    <button data-index="${index}" class="delete-key-btn">Remove</button>
+                `;
+                keyListEl.appendChild(li);
+            });
+        }
+
+        addKeyBtn.onclick = () => {
+            const keyVal = newApiKeyInput.value.trim();
+            if (keyVal) {
+                if (!apiKeys.includes(keyVal)) {
+                    apiKeys.push(keyVal);
+                    saveKeys();
+                    newApiKeyInput.value = '';
+                } else {
+                    alert("This key is already in your list!");
+                }
+            }
+        };
+
+        keyListEl.onclick = (e) => {
+            if (e.target.classList.contains('delete-key-btn')) {
+                const indexToRemove = parseInt(e.target.getAttribute('data-index'));
+                apiKeys.splice(indexToRemove, 1);
+                chatSession = null;
+                saveKeys();
+            }
+        };
+
+        renderKeyList();
+
+        function setupInputListeners(inputEl, btnEl) {
+            inputEl.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+            btnEl.onclick = () => { sendMessage(); };
+        }
+        setupInputListeners(currentInput, currentSendBtn);
+
+        // --- Document PiP Framework Logic ---
+        pipButton.addEventListener('click', async () => {
+            if (!('documentPictureInPicture' in window)) {
+                alert("Your browser doesn't support interactive Document PiP. Try Chrome or Edge!");
+                return;
+            }
+
+            try {
+                const pipWindow = await window.documentPictureInPicture.requestWindow({
+                    width: 450,
+                    height: 500,
+                });
+
+                [...document.styleSheets].forEach((styleSheet) => {
+                    try {
+                        const cssMimeType = styleSheet.type || 'text/css';
+                        const cssSource = [...styleSheet.cssRules].map((rule) => rule.cssText).join('');
+                        const style = document.createElement('style');
+                        style.textContent = cssSource;
+                        pipWindow.document.head.appendChild(style);
+                    } catch (e) {}
+                });
+
+                pipWindow.document.body.appendChild(chatWrapper);
+
+                currentInput = pipWindow.document.getElementById('userInput');
+                currentSendBtn = pipWindow.document.getElementById('sendBtn');
+                currentChatContainer = pipWindow.document.getElementById('chat-container');
+                setupInputListeners(currentInput, currentSendBtn);
+
+                pipWindow.addEventListener('keydown', (e) => {
+                    if (e.key === '`') {
+                        pipWindow.close();
+                    }
+                });
+
+                pipWindow.addEventListener("pagehide", (event) => {
+                    mainContainer.appendChild(chatWrapper);
+                    currentInput = document.getElementById('userInput');
+                    currentSendBtn = document.getElementById('sendBtn');
+                    currentChatContainer = document.getElementById('chat-container');
+                    setupInputListeners(currentInput, currentSendBtn);
+                });
+
+            } catch (error) {
+                console.error("PiP failed: ", error);
+            }
+        });
+
+        // --- Chat Core with Fallback Loop Sequence Engine ---
+        async function sendMessage() {
+            const messageText = currentInput.value.trim();
+
+            if (apiKeys.length === 0) {
+                alert("Please add at least one Gemini API key first.");
+                return;
+            }
+            if (!messageText) return;
+
+            currentInput.value = '';
+            currentInput.disabled = true;
+            currentSendBtn.disabled = true;
+
+            appendMessage(messageText, 'user-message');
+
+            let success = false;
+            
+            for (let i = 0; i < apiKeys.length; i++) {
+                const activeKey = apiKeys[i];
+                
+                try {
+                    if (i > 0) {
+                        appendNotification(`Primary key failed. Attempting connection via Fallback Key #${i}...`, 'fallback-warning');
+                    }
+
+                    const ai = new GoogleGenAI({ apiKey: activeKey });
+                    
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-2.5-flash',
+                        contents: messageText,
+                    });
+
+                    appendMessage(response.text, 'ai-message', true);
+                    success = true;
+                    break;
+                    
+                } catch (error) {
+                    console.warn(`API Key position index ${i} failed: `, error.message);
+                    if (i === apiKeys.length - 1 && !success) {
+                        appendMessage(`Error: All provided API keys failed. Total verification exhausted. last structural error response: ${error.message}`, 'system-message');
+                    }
+                }
+            }
+
+            currentInput.disabled = false;
+            currentSendBtn.disabled = false;
+            currentInput.focus();
+        }
+
+        function appendNotification(text, className) {
+            const notifyDiv = document.createElement('div');
+            notifyDiv.className = className;
+            notifyDiv.innerText = text;
+            currentChatContainer.appendChild(notifyDiv);
+            currentChatContainer.scrollTop = currentChatContainer.scrollHeight;
+        }
+
+        function appendMessage(text, className, isAI = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.innerText = text;
+
+            if (isAI) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'msg-actions';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'action-btn';
+                copyBtn.innerText = 'Copy';
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(text);
+                    copyBtn.innerText = 'Copied!';
+                    setTimeout(() => copyBtn.innerText = 'Copy', 2000);
+                };
+                actionsDiv.appendChild(copyBtn);
+                messageDiv.appendChild(actionsDiv);
+            }
+
+            currentChatContainer.appendChild(messageDiv);
+            currentChatContainer.scrollTop = currentChatContainer.scrollHeight;
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([messageDiv]).catch((err) => console.log(err.message));
+            }
+        }
+    </script>
+</body>
+</html>
