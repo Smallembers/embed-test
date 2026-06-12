@@ -194,27 +194,22 @@
             display: flex;
             flex-direction: column;
             height: 450px;
-            transition: all 0.15s ease-in-out;
+            transition: all 0.1s ease-in-out;
             transform-origin: top left;
         }
 
-        /* Toggled class to drastically compress the visual UI items when minimized */
+        /* Completely hides the visual presence of the application elements when minimized */
         .pip-minimized-ui {
-            padding: 5px !important;
-            height: 100% !important;
-            background: #2563eb !important; /* Turns into a solid colored block indicator */
-            justify-content: center;
-            align-items: center;
+            padding: 0 !important;
+            height: 0px !important;
+            width: 0px !important;
+            border: none !important;
+            background: transparent !important;
+            overflow: hidden !important;
         }
         .pip-minimized-ui #chat-container,
         .pip-minimized-ui .input-area {
-            display: none !important; /* Hides chat stream/inputs so window looks clean */
-        }
-        .pip-minimized-ui::before {
-            content: "💬 AI";
-            font-weight: bold;
-            font-size: 16px;
-            color: white;
+            display: none !important;
         }
 
         #chat-container {
@@ -495,7 +490,6 @@
                 currentChatContainer = pipWindow.document.getElementById('chat-container');
                 setupInputListeners(currentInput, currentSendBtn);
 
-                // Track minimization toggle state
                 let isMinimized = false;
 
                 pipWindow.addEventListener('keydown', (e) => {
@@ -511,14 +505,13 @@
                         isMinimized = !isMinimized;
 
                         if (isMinimized) {
-                            // 1. Instantly compress inner elements to clean badge look
+                            // 1. Completely mask inner contents out of existence
                             chatWrapper.classList.add('pip-minimized-ui');
-                            // 2. Shrink browser frame window size to minimum allowed parameters
-                            pipWindow.resizeTo(140, 100);
+                            // 2. Set the window frame canvas to the lowest legal layout boundaries
+                            pipWindow.resizeTo(100, 40);
                         } else {
-                            // 1. Expand browser window frame size back up
+                            // Restore layout bounds and dimensions back to functional viewports
                             pipWindow.resizeTo(450, 500);
-                            // 2. Restore default desktop application visual layout styles
                             chatWrapper.classList.remove('pip-minimized-ui');
                         }
                     }
