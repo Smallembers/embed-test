@@ -34,21 +34,43 @@
             color: #e3e3e3;
         }
 
+        /* Wrap everything in a main container for easy visibility toggling */
+        #main-app-container {
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Class applied when the UI is hidden */
+        .hidden-ui {
+            opacity: 0 !important;
+            transform: scale(0.95) !important;
+            pointer-events: none; /* Prevents interaction while hidden */
+            user-select: none;
+        }
+
         .header-panel {
             text-align: center;
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
         }
         h2 {
-            margin-bottom: 10px;
             font-weight: 600;
             color: #ffffff;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
         }
         .pip-trigger-btn {
             background-color: #1DB954;
             color: white;
             border: none;
             padding: 12px 24px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             border-radius: 25px;
             cursor: pointer;
@@ -58,8 +80,23 @@
             background-color: #1ed760;
             transform: scale(1.05);
         }
+        .hide-btn {
+            background-color: #3f3f46;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .hide-btn:hover {
+            background-color: #52525b;
+            transform: scale(1.05);
+        }
 
-        /* --- Updated Multi-Key Config Box --- */
+        /* --- Multi-Key Config Box --- */
         .config-box {
             background: #1a1a1e;
             padding: 15px;
@@ -247,25 +284,30 @@
 </head>
 <body>
 
-    <div class="header-panel">
-        <h2>Interactive Gem Chat</h2>
-        <button id="pip-button" class="pip-trigger-btn">Pop Out Chat Player</button>
-    </div>
-
-    <div class="config-box">
-        <label for="newApiKey">Gemini API Keys (Saved locally)</label>
-        <div class="key-input-group">
-            <input type="password" id="newApiKey" placeholder="Add a new AIzaSy... key">
-            <button id="addKeyBtn">Add Key</button>
+    <div id="main-app-container">
+        <div class="header-panel">
+            <h2>Interactive Gem Chat</h2>
+            <div class="btn-group">
+                <button id="pip-button" class="pip-trigger-btn">Pop Out Chat Player</button>
+                <button id="hide-ui-btn" class="hide-btn">Hide Interface (H)</button>
+            </div>
         </div>
-        <ul id="keyList" class="key-list"></ul>
-    </div>
 
-    <div id="chat-ui-wrapper" class="tex2jax_process">
-        <div id="chat-container"></div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Type a message...">
-            <button id="sendBtn">Send</button>
+        <div class="config-box">
+            <label for="newApiKey">Gemini API Keys (Saved locally)</label>
+            <div class="key-input-group">
+                <input type="password" id="newApiKey" placeholder="Add a new AIzaSy... key">
+                <button id="addKeyBtn">Add Key</button>
+            </div>
+            <ul id="keyList" class="key-list"></ul>
+        </div>
+
+        <div id="chat-ui-wrapper" class="tex2jax_process">
+            <div id="chat-container"></div>
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Type a message...">
+                <button id="sendBtn">Send</button>
+            </div>
         </div>
     </div>
 
@@ -280,6 +322,8 @@
     <script type="module">
         import { GoogleGenAI } from '@google/genai';
 
+        const mainContainer = document.getElementById('main-app-container');
+        const hideUiBtn = document.getElementById('hide-ui-btn');
         const chatWrapper = document.getElementById('chat-ui-wrapper');
         const pipButton = document.getElementById('pip-button');
         const newApiKeyInput = document.getElementById('newApiKey');
@@ -290,6 +334,34 @@
         let currentInput = document.getElementById('userInput');
         let currentSendBtn = document.getElementById('sendBtn');
         let currentChatContainer = document.getElementById('chat-container');
+
+        // --- Toggle Visibility Logic ---
+        function toggleUI() {
+            mainContainer.classList.toggle('hidden-ui');
+        }
+
+        // Click event for the dedicated hide button
+        hideUiBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleUI();
+        };
+
+        // Hotkey trigger listener (Global Window Layer)
+        window.addEventListener('keydown', (e) => {
+            // Check if user is typing an actual 'h/H' in an input box so it doesn't accidentally trigger
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                // If they press Escape while focused on input, blur it so they can use the hotkey
+                if (e.key === 'Escape') {
+                    document.activeElement.blur();
+                }
+                return;
+            }
+
+            // Press 'h' or 'H' to toggle the dashboard visibility
+            if (e.key === 'h' || e.key === 'H') {
+                toggleUI();
+            }
+        });
 
         // --- Persistent API Key Storage Management ---
         let apiKeys = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
@@ -309,7 +381,6 @@
                 const li = document.createElement('li');
                 li.className = 'key-item';
                 
-                // Mask key visualization for local safety
                 const maskedKey = key.substring(0, 8) + '...' + key.substring(key.length - 4);
                 const badgeText = index === 0 ? '<span class="badge primary">Primary</span>' : `<span class="badge">Fallback #${index}</span>`;
                 
@@ -321,7 +392,6 @@
             });
         }
 
-        // Add Key Handler
         addKeyBtn.onclick = () => {
             const keyVal = newApiKeyInput.value.trim();
             if (keyVal) {
@@ -335,20 +405,17 @@
             }
         };
 
-        // Remove Key Handler
         keyListEl.onclick = (e) => {
             if (e.target.classList.contains('delete-key-btn')) {
                 const indexToRemove = parseInt(e.target.getAttribute('data-index'));
                 apiKeys.splice(indexToRemove, 1);
-                chatSession = null; // Reset chat context session if keys modify
+                chatSession = null;
                 saveKeys();
             }
         };
 
-        // Initial render of stored keys
         renderKeyList();
 
-        // Setup Event Listeners helper (for syncing elements when moving between windows)
         function setupInputListeners(inputEl, btnEl) {
             inputEl.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
             btnEl.onclick = () => { sendMessage(); };
@@ -368,7 +435,6 @@
                     height: 500,
                 });
 
-                // Port styles down into document layer
                 [...document.styleSheets].forEach((styleSheet) => {
                     try {
                         const cssMimeType = styleSheet.type || 'text/css';
@@ -379,18 +445,23 @@
                     } catch (e) {}
                 });
 
-                // Append UI element tree completely to pip view layer
                 pipWindow.document.body.appendChild(chatWrapper);
 
-                // Relocate runtime target element scopes
                 currentInput = pipWindow.document.getElementById('userInput');
                 currentSendBtn = pipWindow.document.getElementById('sendBtn');
                 currentChatContainer = pipWindow.document.getElementById('chat-container');
                 setupInputListeners(currentInput, currentSendBtn);
 
-                // Window closing recovery callback
+                // Let hotkeys function inside the PiP panel window popout context as well
+                pipWindow.addEventListener('keydown', (e) => {
+                    if (e.key === 'h' || e.key === 'H') {
+                        // For PIP window, close window on hotkey
+                        pipWindow.close();
+                    }
+                });
+
                 pipWindow.addEventListener("pagehide", (event) => {
-                    document.body.appendChild(chatWrapper);
+                    mainContainer.appendChild(chatWrapper);
                     currentInput = document.getElementById('userInput');
                     currentSendBtn = document.getElementById('sendBtn');
                     currentChatContainer = document.getElementById('chat-container');
@@ -420,20 +491,16 @@
 
             let success = false;
             
-            // Loop through keys if failures happen
             for (let i = 0; i < apiKeys.length; i++) {
                 const activeKey = apiKeys[i];
                 
                 try {
-                    // Inform user if using a fallback key
                     if (i > 0) {
                         appendNotification(`Primary key failed. Attempting connection via Fallback Key #${i}...`, 'fallback-warning');
                     }
 
-                    // Always re-initialize the instance if a new fallback position is reached
                     const ai = new GoogleGenAI({ apiKey: activeKey });
                     
-                    // We generate a simple chat session or message pipeline request
                     const response = await ai.models.generateContent({
                         model: 'gemini-2.5-flash',
                         contents: messageText,
@@ -441,11 +508,10 @@
 
                     appendMessage(response.text, 'ai-message', true);
                     success = true;
-                    break; // Exit loop on successful query completion
+                    break;
                     
                 } catch (error) {
                     console.warn(`API Key position index ${i} failed: `, error.message);
-                    // If we are at the last key and it also failed, print final error to window
                     if (i === apiKeys.length - 1 && !success) {
                         appendMessage(`Error: All provided API keys failed. Total verification exhausted. last structural error response: ${error.message}`, 'system-message');
                     }
