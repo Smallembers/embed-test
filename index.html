@@ -35,17 +35,14 @@
             position: relative;
         }
 
-        /* Main container layout control */
         #main-app-container {
             display: block;
         }
 
-        /* Clean hiding rule using display property instead of pointer-events */
         .hidden-ui {
             display: none !important;
         }
 
-        /* Low-profile floating button to reveal the UI when hidden */
         #floating-reveal-btn {
             position: fixed;
             top: 15px;
@@ -58,7 +55,7 @@
             border-radius: 4px;
             cursor: pointer;
             z-index: 9999;
-            display: none; /* Hidden by default */
+            display: none;
         }
         #floating-reveal-btn:hover {
             color: #ffffff;
@@ -197,13 +194,27 @@
             display: flex;
             flex-direction: column;
             height: 450px;
-            transition: transform 0.25s ease-in-out, opacity 0.2s ease-in-out;
+            transition: all 0.15s ease-in-out;
+            transform-origin: top left;
         }
 
-        /* Toggled class to hide PiP contents offscreen smoothly instead of closing window */
-        .pip-offscreen {
-            transform: translateY(-200vh) !important;
-            opacity: 0 !important;
+        /* Toggled class to drastically compress the visual UI items when minimized */
+        .pip-minimized-ui {
+            padding: 5px !important;
+            height: 100% !important;
+            background: #2563eb !important; /* Turns into a solid colored block indicator */
+            justify-content: center;
+            align-items: center;
+        }
+        .pip-minimized-ui #chat-container,
+        .pip-minimized-ui .input-area {
+            display: none !important; /* Hides chat stream/inputs so window looks clean */
+        }
+        .pip-minimized-ui::before {
+            content: "💬 AI";
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
         }
 
         #chat-container {
@@ -362,7 +373,6 @@
         let currentSendBtn = document.getElementById('sendBtn');
         let currentChatContainer = document.getElementById('chat-container');
 
-        // --- Toggle Visibility Logic ---
         function toggleUI() {
             if (mainContainer.classList.contains('hidden-ui')) {
                 mainContainer.classList.remove('hidden-ui');
@@ -373,21 +383,17 @@
             }
         }
 
-        // Hide button click event
         hideUiBtn.onclick = (e) => {
             e.stopPropagation();
             toggleUI();
         };
 
-        // Floating Reveal button click event
         floatingRevealBtn.onclick = (e) => {
             e.stopPropagation();
             toggleUI();
         };
 
-        // Hotkey trigger listener (Uses backtick / ` key)
         window.addEventListener('keydown', (e) => {
-            // Check if user is typing inside an input or textarea
             if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
                 if (e.key === 'Escape') {
                     document.activeElement.blur();
@@ -395,14 +401,12 @@
                 return;
             }
 
-            // Detect backtick key
             if (e.key === '`') {
                 e.preventDefault(); 
                 toggleUI();
             }
         });
 
-        // --- Persistent API Key Storage Management ---
         let apiKeys = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
 
         function saveKeys() {
@@ -491,7 +495,9 @@
                 currentChatContainer = pipWindow.document.getElementById('chat-container');
                 setupInputListeners(currentInput, currentSendBtn);
 
-                // Updated: Backtick key now shoves the layout out of view inside the PiP canvas instead of closing the window
+                // Track minimization toggle state
+                let isMinimized = false;
+
                 pipWindow.addEventListener('keydown', (e) => {
                     if (pipWindow.document.activeElement.tagName === 'INPUT' || pipWindow.document.activeElement.tagName === 'TEXTAREA') {
                         if (e.key === 'Escape') {
@@ -502,13 +508,24 @@
 
                     if (e.key === '`') {
                         e.preventDefault();
-                        chatWrapper.classList.toggle('pip-offscreen');
+                        isMinimized = !isMinimized;
+
+                        if (isMinimized) {
+                            // 1. Instantly compress inner elements to clean badge look
+                            chatWrapper.classList.add('pip-minimized-ui');
+                            // 2. Shrink browser frame window size to minimum allowed parameters
+                            pipWindow.resizeTo(140, 100);
+                        } else {
+                            // 1. Expand browser window frame size back up
+                            pipWindow.resizeTo(450, 500);
+                            // 2. Restore default desktop application visual layout styles
+                            chatWrapper.classList.remove('pip-minimized-ui');
+                        }
                     }
                 });
 
                 pipWindow.addEventListener("pagehide", (event) => {
-                    // Clean up and ensure layout is visible when returning to main frame
-                    chatWrapper.classList.remove('pip-offscreen');
+                    chatWrapper.classList.remove('pip-minimized-ui');
                     mainContainer.appendChild(chatWrapper);
                     currentInput = document.getElementById('userInput');
                     currentSendBtn = document.getElementById('sendBtn');
@@ -521,7 +538,7 @@
             }
         });
 
-        // --- Chat Core with Fallback Loop Sequence Engine ---
+        // --- Chat Core Engine ---
         async function sendMessage() {
             const messageText = currentInput.value.trim();
 
