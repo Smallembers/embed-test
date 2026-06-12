@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Mini-Player Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: #181818;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        button {
+            background-color: #1DB954;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        button:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+        }
+        /* Hide the actual video/canvas elements used for the trick */
+        #hidden-assets {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Spotify-Style Mini Player</h2>
+        <p>Click the button below to launch the floating overlay.</p>
+        <button id="pip-button">Open Floating Player</button>
+    </div>
+
+    <div id="hidden-assets">
+        <canvas id="player-canvas" width="400" height="400"></canvas>
+        <video id="player-video" autoplay muted loop playsinline></video>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('player-canvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.getElementById('player-video');
+        const pipButton = document.getElementById('pip-button');
+
+        // 1. Draw "Album Art" or content onto the hidden canvas
+        function drawCanvas() {
+            // Background
+            ctx.fillStyle = '#282828';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Fake Album Art Square
+            ctx.fillStyle = '#1DB954';
+            ctx.fillRect(50, 50, 300, 240);
+
+            // Text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 24px sans-serif';
+            ctx.fillText('Now Playing', 50, 330);
+            
+            ctx.fillStyle = '#B3B3B3';
+            ctx.font = '18px sans-serif';
+            ctx.fillText('Your Awesome Track', 50, 360);
+        }
+
+        // 2. Set up the stream
+        drawCanvas();
+        // Capture the canvas at 30 frames per second and feed it to the video
+        const stream = canvas.captureStream(30);
+        video.srcObject = stream;
+
+        // 3. Trigger Picture-in-Picture on button click
+        pipButton.addEventListener('click', async () => {
+            try {
+                // Video must be playing before we can request PiP
+                await video.play();
+                // Request the browser to pop out the video
+                await video.requestPictureInPicture();
+            } catch (error) {
+                console.error("PiP failed to load: ", error);
+                alert("Your browser might not support Picture-in-Picture for canvas streams.");
+            }
+        });
+    </script>
+
+</body>
+</html>
