@@ -197,6 +197,13 @@
             display: flex;
             flex-direction: column;
             height: 450px;
+            transition: transform 0.25s ease-in-out, opacity 0.2s ease-in-out;
+        }
+
+        /* Toggled class to hide PiP contents offscreen smoothly instead of closing window */
+        .pip-offscreen {
+            transform: translateY(-200vh) !important;
+            opacity: 0 !important;
         }
 
         #chat-container {
@@ -484,13 +491,24 @@
                 currentChatContainer = pipWindow.document.getElementById('chat-container');
                 setupInputListeners(currentInput, currentSendBtn);
 
+                // Updated: Backtick key now shoves the layout out of view inside the PiP canvas instead of closing the window
                 pipWindow.addEventListener('keydown', (e) => {
+                    if (pipWindow.document.activeElement.tagName === 'INPUT' || pipWindow.document.activeElement.tagName === 'TEXTAREA') {
+                        if (e.key === 'Escape') {
+                            pipWindow.document.activeElement.blur();
+                        }
+                        return;
+                    }
+
                     if (e.key === '`') {
-                        pipWindow.close();
+                        e.preventDefault();
+                        chatWrapper.classList.toggle('pip-offscreen');
                     }
                 });
 
                 pipWindow.addEventListener("pagehide", (event) => {
+                    // Clean up and ensure layout is visible when returning to main frame
+                    chatWrapper.classList.remove('pip-offscreen');
                     mainContainer.appendChild(chatWrapper);
                     currentInput = document.getElementById('userInput');
                     currentSendBtn = document.getElementById('sendBtn');
@@ -526,7 +544,7 @@
                 
                 try {
                     if (i > 0) {
-                        appendNotification(`Primary key failed. Attempting connection via Fallback Key #${i}...`, 'fallback-warning');
+                        appendNotification("Primary key failed. Attempting connection via Fallback Key #" + i + "...", 'fallback-warning');
                     }
 
                     const ai = new GoogleGenAI({ apiKey: activeKey });
@@ -541,9 +559,9 @@
                     break;
                     
                 } catch (error) {
-                    console.warn(`API Key position index ${i} failed: `, error.message);
+                    console.warn("API Key position index " + i + " failed: ", error.message);
                     if (i === apiKeys.length - 1 && !success) {
-                        appendMessage(`Error: All provided API keys failed. Total verification exhausted. last structural error response: ${error.message}`, 'system-message');
+                        appendMessage("Error: All provided API keys failed. Total verification exhausted. last structural error response: " + error.message, 'system-message');
                     }
                 }
             }
@@ -563,7 +581,7 @@
 
         function appendMessage(text, className, isAI = false) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${className}`;
+            messageDiv.className = "message " + className;
             messageDiv.innerText = text;
 
             if (isAI) {
