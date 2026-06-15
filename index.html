@@ -35,7 +35,7 @@
             position: relative;
         }
 
-        #main-app-container {
+        #_0x1a {
             display: block;
         }
 
@@ -110,7 +110,6 @@
             transform: scale(1.05);
         }
 
-        /* --- Multi-Key Config Box --- */
         .config-box {
             background: #1a1a1e;
             padding: 15px;
@@ -185,8 +184,7 @@
             font-weight: bold;
         }
 
-        /* --- Main  UI --- */
-        #chat-ui-wrapper {
+        #_0x2b {
             background: #1a1a1e;
             padding: 20px;
             border-radius: 12px;
@@ -198,7 +196,6 @@
             transform-origin: top left;
         }
 
-        /* Completely hides the visual presence of the application elements when minimized */
         .pip-minimized-ui {
             padding: 0 !important;
             height: 0px !important;
@@ -207,12 +204,12 @@
             background: transparent !important;
             overflow: hidden !important;
         }
-        .pip-minimized-ui #chat-container,
+        .pip-minimized-ui #_0x3c,
         .pip-minimized-ui .input-area {
             display: none !important;
         }
 
-        #chat-container {
+        #_0x3c {
             flex-grow: 1;
             border: 1px solid #2e2e34;
             background: #121214;
@@ -221,7 +218,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
-        .message {
+        ._0x4d {
             margin-bottom: 15px;
             padding: 12px 16px;
             border-radius: 18px;
@@ -231,13 +228,13 @@
             font-size: 15px;
             position: relative;
         }
-        .user-message {
+        .user-_0x4d {
             background-color: #2563eb;
             color: #ffffff;
             margin-left: auto;
             border-bottom-right-radius: 4px;
         }
-        .ai-message {
+        .ai-_0x4d {
             background-color: #2e2e34;
             color: #e3e3e3;
             margin-right: auto;
@@ -267,7 +264,7 @@
             background: #2563eb;
         }
 
-        .system-message {
+        .system-_0x4d {
             background-color: transparent;
             color: #ef4444;
             margin: 10px auto;
@@ -332,11 +329,11 @@
             <ul id="keyList" class="key-list"></ul>
         </div>
 
-        <div id="chat-ui-wrapper" class="tex2jax_process">
-            <div id="chat-container"></div>
+        <div id="_0x2b" class="tex2jax_process">
+            <div id="_0x3c"></div>
             <div class="input-area">
-                <input type="text" id="userInput" placeholder="Type a message...">
-                <button id="sendBtn">Send</button>
+                <input type="text" id="userInput" placeholder="Process input...">
+                <button id="sendBtn">Transmit</button>
             </div>
         </div>
     </div>
@@ -354,38 +351,38 @@
     <script type="module">
         import { GoogleGenAI } from '@google/genai';
 
-        const mainContainer = document.getElementById('main-app-container');
-        const hideUiBtn = document.getElementById('hide-ui-btn');
-        const floatingRevealBtn = document.getElementById('floating-reveal-btn');
-        const chatWrapper = document.getElementById('chat-ui-wrapper');
-        const pipButton = document.getElementById('pip-button');
-        const newApiKeyInput = document.getElementById('newApiKey');
-        const addKeyBtn = document.getElementById('addKeyBtn');
-        const keyListEl = document.getElementById('keyList');
+        const _0xaa = document.getElementById('main-app-container');
+        const _0xbb = document.getElementById('hide-ui-btn');
+        const _0xcc = document.getElementById('floating-reveal-btn');
+        const _0xdd = document.getElementById('_0x2b');
+        const _0xee = document.getElementById('pip-button');
+        const _0xff = document.getElementById('newApiKey');
+        const _0x11 = document.getElementById('addKeyBtn');
+        const _0x22 = document.getElementById('keyList');
         
-        let chatSession = null;
-        let currentInput = document.getElementById('userInput');
-        let currentSendBtn = document.getElementById('sendBtn');
-        let currentChatContainer = document.getElementById('chat-container');
+        let _0x33 = null;
+        let _0x44 = document.getElementById('userInput');
+        let _0x55 = document.getElementById('sendBtn');
+        let _0x66 = document.getElementById('_0x3c');
 
-        function toggleUI() {
-            if (mainContainer.classList.contains('hidden-ui')) {
-                mainContainer.classList.remove('hidden-ui');
-                floatingRevealBtn.style.display = 'none';
+        function _0x77() {
+            if (_0xaa.classList.contains('hidden-ui')) {
+                _0xaa.classList.remove('hidden-ui');
+                _0xcc.style.display = 'none';
             } else {
-                mainContainer.classList.add('hidden-ui');
-                floatingRevealBtn.style.display = 'block';
+                _0xaa.classList.add('hidden-ui');
+                _0xcc.style.display = 'block';
             }
         }
 
-        hideUiBtn.onclick = (e) => {
+        _0xbb.onclick = (e) => {
             e.stopPropagation();
-            toggleUI();
+            _0x77();
         };
 
-        floatingRevealBtn.onclick = (e) => {
+        _0xcc.onclick = (e) => {
             e.stopPropagation();
-            toggleUI();
+            _0x77();
         };
 
         window.addEventListener('keydown', (e) => {
@@ -398,24 +395,24 @@
 
             if (e.key === '`') {
                 e.preventDefault(); 
-                toggleUI();
+                _0x77();
             }
         });
 
-        let apiKeys = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
+        let _0x88 = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
 
-        function saveKeys() {
-            localStorage.setItem('gemini_api_keys', JSON.stringify(apiKeys));
-            renderKeyList();
+        function _0x99() {
+            localStorage.setItem('gemini_api_keys', JSON.stringify(_0x88));
+            _0x0a();
         }
 
-        function renderKeyList() {
-            keyListEl.innerHTML = '';
-            if (apiKeys.length === 0) {
-                keyListEl.innerHTML = `<li style="font-size:12px; color:#a1a1aa; text-align:center;">No keys added yet. Add at least one above.</li>`;
+        function _0x0a() {
+            _0x22.innerHTML = '';
+            if (_0x88.length === 0) {
+                _0x22.innerHTML = `<li style="font-size:12px; color:#a1a1aa; text-align:center;">No keys added yet. Add at least one above.</li>`;
                 return;
             }
-            apiKeys.forEach((key, index) => {
+            _0x88.forEach((key, index) => {
                 const li = document.createElement('li');
                 li.className = 'key-item';
                 
@@ -426,42 +423,41 @@
                     <div>${maskedKey} ${badgeText}</div>
                     <button data-index="${index}" class="delete-key-btn">Remove</button>
                 `;
-                keyListEl.appendChild(li);
+                _0x22.appendChild(li);
             });
         }
 
-        addKeyBtn.onclick = () => {
-            const keyVal = newApiKeyInput.value.trim();
+        _0x11.onclick = () => {
+            const keyVal = _0xff.value.trim();
             if (keyVal) {
-                if (!apiKeys.includes(keyVal)) {
-                    apiKeys.push(keyVal);
-                    saveKeys();
-                    newApiKeyInput.value = '';
+                if (!_0x88.includes(keyVal)) {
+                    _0x88.push(keyVal);
+                    _0x99();
+                    _0xff.value = '';
                 } else {
                     alert("This key is already in your list!");
                 }
             }
         };
 
-        keyListEl.onclick = (e) => {
+        _0x22.onclick = (e) => {
             if (e.target.classList.contains('delete-key-btn')) {
                 const indexToRemove = parseInt(e.target.getAttribute('data-index'));
-                apiKeys.splice(indexToRemove, 1);
-                chatSession = null;
-                saveKeys();
+                _0x88.splice(indexToRemove, 1);
+                _0x33 = null;
+                _0x99();
             }
         };
 
-        renderKeyList();
+        _0x0a();
 
-        function setupInputListeners(inputEl, btnEl) {
-            inputEl.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
-            btnEl.onclick = () => { sendMessage(); };
+        function _0x1b(inputEl, btnEl) {
+            inputEl.onkeypress = (e) => { if(e.key === 'Enter') _0x2c(); };
+            btnEl.onclick = () => { _0x2c(); };
         }
-        setupInputListeners(currentInput, currentSendBtn);
+        _0x1b(_0x44, _0x55);
 
-        // --- Document PiP Framework Logic ---
-        pipButton.addEventListener('click', async () => {
+        _0xee.addEventListener('click', async () => {
             if (!('documentPictureInPicture' in window)) {
                 alert("Your browser doesn't support interactive Document PiP. Try Chrome or Edge!");
                 return;
@@ -473,22 +469,22 @@
                     height: 500,
                 });
 
-                [...document.styleSheets].forEach((styleSheet) => {
+                ([...document.styleSheets]).forEach((styleSheet) => {
                     try {
                         const cssMimeType = styleSheet.type || 'text/css';
-                        const cssSource = [...styleSheet.cssRules].map((rule) => rule.cssText).join('');
+                        const cssSource = ([...styleSheet.cssRules]).map((rule) => rule.cssText).join('');
                         const style = document.createElement('style');
                         style.textContent = cssSource;
                         pipWindow.document.head.appendChild(style);
                     } catch (e) {}
                 });
 
-                pipWindow.document.body.appendChild(chatWrapper);
+                pipWindow.document.body.appendChild(_0xdd);
 
-                currentInput = pipWindow.document.getElementById('userInput');
-                currentSendBtn = pipWindow.document.getElementById('sendBtn');
-                currentChatContainer = pipWindow.document.getElementById('chat-container');
-                setupInputListeners(currentInput, currentSendBtn);
+                _0x44 = pipWindow.document.getElementById('userInput');
+                _0x55 = pipWindow.document.getElementById('sendBtn');
+                _0x66 = pipWindow.document.getElementById('_0x3c');
+                _0x1b(_0x44, _0x55);
 
                 let isMinimized = false;
 
@@ -505,25 +501,22 @@
                         isMinimized = !isMinimized;
 
                         if (isMinimized) {
-                            // 1. Completely mask inner contents out of existence
-                            chatWrapper.classList.add('pip-minimized-ui');
-                            // 2. Set the window frame canvas to the lowest legal layout boundaries
+                            _0xdd.classList.add('pip-minimized-ui');
                             pipWindow.resizeTo(100, 40);
                         } else {
-                            // Restore layout bounds and dimensions back to functional viewports
                             pipWindow.resizeTo(450, 500);
-                            chatWrapper.classList.remove('pip-minimized-ui');
+                            _0xdd.classList.remove('pip-minimized-ui');
                         }
                     }
                 });
 
                 pipWindow.addEventListener("pagehide", (event) => {
-                    chatWrapper.classList.remove('pip-minimized-ui');
-                    mainContainer.appendChild(chatWrapper);
-                    currentInput = document.getElementById('userInput');
-                    currentSendBtn = document.getElementById('sendBtn');
-                    currentChatContainer = document.getElementById('chat-container');
-                    setupInputListeners(currentInput, currentSendBtn);
+                    _0xdd.classList.remove('pip-minimized-ui');
+                    _0xaa.appendChild(_0xdd);
+                    _0x44 = document.getElementById('userInput');
+                    _0x55 = document.getElementById('sendBtn');
+                    _0x66 = document.getElementById('_0x3c');
+                    _0x1b(_0x44, _0x55);
                 });
 
             } catch (error) {
@@ -531,67 +524,66 @@
             }
         });
 
-        // --- Chat Core Engine ---
-        async function sendMessage() {
-            const messageText = currentInput.value.trim();
+        async function _0x2c() {
+            const rawTxt = _0x44.value.trim();
 
-            if (apiKeys.length === 0) {
+            if (_0x88.length === 0) {
                 alert("Please add at least one Gemini API key first.");
                 return;
             }
-            if (!messageText) return;
+            if (!rawTxt) return;
 
-            currentInput.value = '';
-            currentInput.disabled = true;
-            currentSendBtn.disabled = true;
+            _0x44.value = '';
+            _0x44.disabled = true;
+            _0x55.disabled = true;
 
-            appendMessage(messageText, 'user-message');
+            _0x4c(rawTxt, 'user-_0x4d');
 
             let success = false;
             
-            for (let i = 0; i < apiKeys.length; i++) {
-                const activeKey = apiKeys[i];
+            for (let i = 0; i < _0x88.length; i++) {
+                const activeKey = _0x88[i];
                 
                 try {
                     if (i > 0) {
-                        appendNotification("Primary key failed. Attempting connection via Fallback Key #" + i + "...", 'fallback-warning');
+                        _0x3b("Primary key failed. Attempting connection via Fallback Key #" + i + "...", 'fallback-warning');
                     }
 
                     const ai = new GoogleGenAI({ apiKey: activeKey });
                     
                     const response = await ai.models.generateContent({
                         model: 'gemini-2.5-flash',
-                        contents: messageText,
+                        contents: rawTxt,
                     });
 
-                    appendMessage(response.text, 'ai-message', true);
+                    _0x4c(response.text, 'ai-_0x4d', true);
                     success = true;
                     break;
                     
                 } catch (error) {
                     console.warn("API Key position index " + i + " failed: ", error.message);
-                    if (i === apiKeys.length - 1 && !success) {
-                        appendMessage("Error: All provided API keys failed. Total verification exhausted. last structural error response: " + error.message, 'system-message');
+                    if (i === _0x88.length - 1 && !success) {
+                        _0x4c("Error: All provided API keys failed. Total verification exhausted. last structural error response: " + error.message, 'system-_0x4d');
                     }
                 }
             }
 
-            currentInput.disabled = false;
-            currentSendBtn.disabled = false;
-            currentInput.focus();
+            _0x44.disabled = false;
+            _0x55.disabled = false;
+            _0x44.focus();
         }
 
-        function appendNotification(text, className) {
+        function _0x3b(text, className) {
             const notifyDiv = document.createElement('div');
             notifyDiv.className = className;
             notifyDiv.innerText = text;
-            currentChatContainer.appendChild(notifyDiv);
-            currentChatContainer.scrollTop = currentChatContainer.scrollHeight;
+            _0x66.appendChild(notifyDiv);
+            _0x66.scrollTop = _0x66.scrollHeight;
         }
 
-        function appendMessage(text, className, isAI = false) {
+        function _0x4c(text, className, isAI = false) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = "message " + className;
+            messageDiv.className = "_0x4d " + className;
             messageDiv.innerText = text;
 
             if (isAI) {
@@ -610,8 +602,8 @@
                 messageDiv.appendChild(actionsDiv);
             }
 
-            currentChatContainer.appendChild(messageDiv);
-            currentChatContainer.scrollTop = currentChatContainer.scrollHeight;
+            _0x66.appendChild(messageDiv);
+            _0x66.scrollTop = _0x66.scrollHeight;
 
             if (window.MathJax && window.MathJax.typesetPromise) {
                 window.MathJax.typesetPromise([messageDiv]).catch((err) => console.log(err.message));
