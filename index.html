@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bare Bones</title>
+    <title>Alternative Method</title>
 </head>
 <body style="background: black;">
 
-    <button id="btn" onclick="openPip()">Open Popup</button>
+    <button id="btn" onclick="openPopup()">Open Popup</button>
 
     <script>
-        async function openPip() {
-            // Open the floating window
-            const pip = await window.documentPictureInPicture.requestWindow();
+        function openPopup() {
+            // Opens a clean, minimal browser popup window
+            window.open("", "viewer", "width=450,height=350,menubar=no,toolbar=no");
             
-            // Put text inside the popup
-            pip.document.body.innerHTML = "<h1>Popup Content</h1>";
-            
-            // Hide the button on the main screen
-            document.getElementById("btn").style.display = "none";
+            // Hides the button on the main screen, leaving it black
+            document.getElementById("btn").style.style.display = "none";
         }
     </script>
 
