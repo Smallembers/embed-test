@@ -1,86 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Screen</title>
-    <style>
-        /* Setting the main screen background to black */
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #000000; 
-            transition: background-color 0.3s ease;
-        }
-
-        button {
-            padding: 15px 30px;
-            font-size: 16px;
-            background-color: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #4338ca;
-        }
-
-        /* Class to hide the button completely once clicked */
-        .hidden {
-            display: none;
-        }
-    </style>
+    <title>Bare Bones</title>
 </head>
-<body>
+<body style="background: black;">
 
-    <div id="mainContent">
-        <button id="openPipBtn">Open Floating Document Viewer</button>
-    </div>
+    <button id="btn" onclick="openPip()">Open Popup</button>
 
     <script>
-        const openPipBtn = document.getElementById('openPipBtn');
-        const mainContent = document.getElementById('mainContent');
-
-        openPipBtn.addEventListener('click', async () => {
-            // Check if the browser supports Document Picture-in-Picture
-            if ('documentPictureInPicture' in window) {
-                try {
-                    // Request the floating always-on-top window
-                    const pipWindow = await window.documentPictureInPicture.requestWindow({
-                        width: 450,
-                        height: 350,
-                    });
-
-                    // 1. Hide the main screen content so it goes completely blank/black
-                    mainContent.classList.add('hidden');
-
-                    // 2. Insert content into the floating window
-                    pipWindow.document.body.innerHTML = `
-                        <div style="font-family: Arial, sans-serif; padding: 20px;">
-                            <h3 style="color: #4f46e5; margin-top: 0;">Document Viewer</h3>
-                            <p>This floating window is active.</p>
-                            <p>The main screen behind it has been turned completely blank and black.</p>
-                        </div>
-                    `;
-
-                    // 3. Optional: Restore the main screen if the user closes the floating popup
-                    pipWindow.addEventListener('pagehide', () => {
-                        mainContent.classList.remove('hidden');
-                    });
-
-                } catch (error) {
-                    console.error("Failed to open floating window:", error);
-                }
-            } else {
-                alert("Your version of Chrome doesn't fully support the Document PiP API. Try using the native ChromeOS shortcut (Search + Alt + F) instead!");
-            }
-        });
+        async function openPip() {
+            // Open the floating window
+            const pip = await window.documentPictureInPicture.requestWindow();
+            
+            // Put text inside the popup
+            pip.document.body.innerHTML = "<h1>Popup Content</h1>";
+            
+            // Hide the button on the main screen
+            document.getElementById("btn").style.display = "none";
+        }
     </script>
 
 </body>
