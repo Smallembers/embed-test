@@ -35,7 +35,7 @@
             position: relative;
         }
 
-        #_0x1a {
+        #main-app-container {
             display: block;
         }
 
@@ -184,7 +184,7 @@
             font-weight: bold;
         }
 
-        #_0x2b {
+        #chat-window-container {
             background: #1a1a1e;
             padding: 20px;
             border-radius: 12px;
@@ -204,12 +204,12 @@
             background: transparent !important;
             overflow: hidden !important;
         }
-        .pip-minimized-ui #_0x3c,
+        .pip-minimized-ui #chat-messages-box,
         .pip-minimized-ui .input-area {
             display: none !important;
         }
 
-        #_0x3c {
+        #chat-messages-box {
             flex-grow: 1;
             border: 1px solid #2e2e34;
             background: #121214;
@@ -218,7 +218,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
-        ._0x4d {
+        .message-bubble {
             margin-bottom: 15px;
             padding: 12px 16px;
             border-radius: 18px;
@@ -228,13 +228,13 @@
             font-size: 15px;
             position: relative;
         }
-        .user-_0x4d {
+        .user-message {
             background-color: #2563eb;
             color: #ffffff;
             margin-left: auto;
             border-bottom-right-radius: 4px;
         }
-        .ai-_0x4d {
+        .ai-message {
             background-color: #2e2e34;
             color: #e3e3e3;
             margin-right: auto;
@@ -264,7 +264,7 @@
             background: #2563eb;
         }
 
-        .system-_0x4d {
+        .system-message {
             background-color: transparent;
             color: #ef4444;
             margin: 10px auto;
@@ -329,8 +329,8 @@
             <ul id="keyList" class="key-list"></ul>
         </div>
 
-        <div id="_0x2b" class="tex2jax_process">
-            <div id="_0x3c"></div>
+        <div id="chat-window-container" class="tex2jax_process">
+            <div id="chat-messages-box"></div>
             <div class="input-area">
                 <input type="text" id="userInput" placeholder="Process input...">
                 <button id="sendBtn">Transmit</button>
@@ -351,38 +351,38 @@
     <script type="module">
         import { GoogleGenAI } from '@google/genai';
 
-        const _0xaa = document.getElementById('main-app-container');
-        const _0xbb = document.getElementById('hide-ui-btn');
-        const _0xcc = document.getElementById('floating-reveal-btn');
-        const _0xdd = document.getElementById('_0x2b');
-        const _0xee = document.getElementById('pip-button');
-        const _0xff = document.getElementById('newApiKey');
-        const _0x11 = document.getElementById('addKeyBtn');
-        const _0x22 = document.getElementById('keyList');
+        const mainAppContainer = document.getElementById('main-app-container');
+        const hideUiBtn = document.getElementById('hide-ui-btn');
+        const floatingRevealBtn = document.getElementById('floating-reveal-btn');
+        const chatWindowContainer = document.getElementById('chat-window-container');
+        const pipButton = document.getElementById('pip-button');
+        const newApiKeyInput = document.getElementById('newApiKey');
+        const addKeyBtn = document.getElementById('addKeyBtn');
+        const keyListContainer = document.getElementById('keyList');
         
-        let _0x33 = null;
-        let _0x44 = document.getElementById('userInput');
-        let _0x55 = document.getElementById('sendBtn');
-        let _0x66 = document.getElementById('_0x3c');
+        let geminiClient = null;
+        let userInputField = document.getElementById('userInput');
+        let sendMsgBtn = document.getElementById('sendBtn');
+        let chatMessagesBox = document.getElementById('chat-messages-box');
 
-        function _0x77() {
-            if (_0xaa.classList.contains('hidden-ui')) {
-                _0xaa.classList.remove('hidden-ui');
-                _0xcc.style.display = 'none';
+        function toggleUserInterface() {
+            if (mainAppContainer.classList.contains('hidden-ui')) {
+                mainAppContainer.classList.remove('hidden-ui');
+                floatingRevealBtn.style.display = 'none';
             } else {
-                _0xaa.classList.add('hidden-ui');
-                _0xcc.style.display = 'block';
+                mainAppContainer.classList.add('hidden-ui');
+                floatingRevealBtn.style.display = 'block';
             }
         }
 
-        _0xbb.onclick = (e) => {
+        hideUiBtn.onclick = (e) => {
             e.stopPropagation();
-            _0x77();
+            toggleUserInterface();
         };
 
-        _0xcc.onclick = (e) => {
+        floatingRevealBtn.onclick = (e) => {
             e.stopPropagation();
-            _0x77();
+            toggleUserInterface();
         };
 
         window.addEventListener('keydown', (e) => {
@@ -395,24 +395,24 @@
 
             if (e.key === '`') {
                 e.preventDefault(); 
-                _0x77();
+                toggleUserInterface();
             }
         });
 
-        let _0x88 = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
+        let savedApiKeys = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
 
-        function _0x99() {
-            localStorage.setItem('gemini_api_keys', JSON.stringify(_0x88));
-            _0x0a();
+        function updateStorageAndList() {
+            localStorage.setItem('gemini_api_keys', JSON.stringify(savedApiKeys));
+            renderKeyList();
         }
 
-        function _0x0a() {
-            _0x22.innerHTML = '';
-            if (_0x88.length === 0) {
-                _0x22.innerHTML = `<li style="font-size:12px; color:#a1a1aa; text-align:center;">No keys added yet. Add at least one above.</li>`;
+        function renderKeyList() {
+            keyListContainer.innerHTML = '';
+            if (savedApiKeys.length === 0) {
+                keyListContainer.innerHTML = `<li style="font-size:12px; color:#a1a1aa; text-align:center;">No keys added yet. Add at least one above.</li>`;
                 return;
             }
-            _0x88.forEach((key, index) => {
+            savedApiKeys.forEach((key, index) => {
                 const li = document.createElement('li');
                 li.className = 'key-item';
                 
@@ -423,41 +423,41 @@
                     <div>${maskedKey} ${badgeText}</div>
                     <button data-index="${index}" class="delete-key-btn">Remove</button>
                 `;
-                _0x22.appendChild(li);
+                keyListContainer.appendChild(li);
             });
         }
 
-        _0x11.onclick = () => {
-            const keyVal = _0xff.value.trim();
+        addKeyBtn.onclick = () => {
+            const keyVal = newApiKeyInput.value.trim();
             if (keyVal) {
-                if (!_0x88.includes(keyVal)) {
-                    _0x88.push(keyVal);
-                    _0x99();
-                    _0xff.value = '';
+                if (!savedApiKeys.includes(keyVal)) {
+                    savedApiKeys.push(keyVal);
+                    updateStorageAndList();
+                    newApiKeyInput.value = '';
                 } else {
                     alert("This key is already in your list!");
                 }
             }
         };
 
-        _0x22.onclick = (e) => {
+        keyListContainer.onclick = (e) => {
             if (e.target.classList.contains('delete-key-btn')) {
                 const indexToRemove = parseInt(e.target.getAttribute('data-index'));
-                _0x88.splice(indexToRemove, 1);
-                _0x33 = null;
-                _0x99();
+                savedApiKeys.splice(indexToRemove, 1);
+                geminiClient = null;
+                updateStorageAndList();
             }
         };
 
-        _0x0a();
+        renderKeyList();
 
-        function _0x1b(inputEl, btnEl) {
-            inputEl.onkeypress = (e) => { if(e.key === 'Enter') _0x2c(); };
-            btnEl.onclick = () => { _0x2c(); };
+        function bindInputEvents(inputEl, btnEl) {
+            inputEl.onkeypress = (e) => { if(e.key === 'Enter') handleMessageSubmit(); };
+            btnEl.onclick = () => { handleMessageSubmit(); };
         }
-        _0x1b(_0x44, _0x55);
+        bindInputEvents(userInputField, sendMsgBtn);
 
-        _0xee.addEventListener('click', async () => {
+        pipButton.addEventListener('click', async () => {
             if (!('documentPictureInPicture' in window)) {
                 alert("Your browser doesn't support interactive Document PiP. Try Chrome or Edge!");
                 return;
@@ -479,12 +479,12 @@
                     } catch (e) {}
                 });
 
-                pipWindow.document.body.appendChild(_0xdd);
+                pipWindow.document.body.appendChild(chatWindowContainer);
 
-                _0x44 = pipWindow.document.getElementById('userInput');
-                _0x55 = pipWindow.document.getElementById('sendBtn');
-                _0x66 = pipWindow.document.getElementById('_0x3c');
-                _0x1b(_0x44, _0x55);
+                userInputField = pipWindow.document.getElementById('userInput');
+                sendMsgBtn = pipWindow.document.getElementById('sendBtn');
+                chatMessagesBox = pipWindow.document.getElementById('_chat-messages-box');
+                bindInputEvents(userInputField, sendMsgBtn);
 
                 let isMinimized = false;
 
@@ -501,22 +501,22 @@
                         isMinimized = !isMinimized;
 
                         if (isMinimized) {
-                            _0xdd.classList.add('pip-minimized-ui');
+                            chatWindowContainer.classList.add('pip-minimized-ui');
                             pipWindow.resizeTo(100, 40);
                         } else {
                             pipWindow.resizeTo(450, 500);
-                            _0xdd.classList.remove('pip-minimized-ui');
+                            chatWindowContainer.classList.remove('pip-minimized-ui');
                         }
                     }
                 });
 
                 pipWindow.addEventListener("pagehide", (event) => {
-                    _0xdd.classList.remove('pip-minimized-ui');
-                    _0xaa.appendChild(_0xdd);
-                    _0x44 = document.getElementById('userInput');
-                    _0x55 = document.getElementById('sendBtn');
-                    _0x66 = document.getElementById('_0x3c');
-                    _0x1b(_0x44, _0x55);
+                    chatWindowContainer.classList.remove('pip-minimized-ui');
+                    mainAppContainer.appendChild(chatWindowContainer);
+                    userInputField = document.getElementById('userInput');
+                    sendMsgBtn = document.getElementById('sendBtn');
+                    chatMessagesBox = document.getElementById('chat-messages-box');
+                    bindInputEvents(userInputField, sendMsgBtn);
                 });
 
             } catch (error) {
@@ -524,29 +524,29 @@
             }
         });
 
-        async function _0x2c() {
-            const rawTxt = _0x44.value.trim();
+        async function handleMessageSubmit() {
+            const rawTxt = userInputField.value.trim();
 
-            if (_0x88.length === 0) {
+            if (savedApiKeys.length === 0) {
                 alert("Please add at least one Gemini API key first.");
                 return;
             }
             if (!rawTxt) return;
 
-            _0x44.value = '';
-            _0x44.disabled = true;
-            _0x55.disabled = true;
+            userInputField.value = '';
+            userInputField.disabled = true;
+            sendMsgBtn.disabled = true;
 
-            _0x4c(rawTxt, 'user-_0x4d');
+            appendMessageBubble(rawTxt, 'user-message');
 
             let success = false;
             
-            for (let i = 0; i < _0x88.length; i++) {
-                const activeKey = _0x88[i];
+            for (let i = 0; i < savedApiKeys.length; i++) {
+                const activeKey = savedApiKeys[i];
                 
                 try {
                     if (i > 0) {
-                        _0x3b("Primary key failed. Attempting connection via Fallback Key #" + i + "...", 'fallback-warning');
+                        appendNotificationBubble("Primary key failed. Attempting connection via Fallback Key #" + i + "...", 'fallback-warning');
                     }
 
                     const ai = new GoogleGenAI({ apiKey: activeKey });
@@ -556,34 +556,34 @@
                         contents: rawTxt,
                     });
 
-                    _0x4c(response.text, 'ai-_0x4d', true);
+                    appendMessageBubble(response.text, 'ai-message', true);
                     success = true;
                     break;
                     
                 } catch (error) {
                     console.warn("API Key position index " + i + " failed: ", error.message);
-                    if (i === _0x88.length - 1 && !success) {
-                        _0x4c("Error: All provided API keys failed. Total verification exhausted. last structural error response: " + error.message, 'system-_0x4d');
+                    if (i === savedApiKeys.length - 1 && !success) {
+                        appendMessageBubble("Error: All provided API keys failed. Total verification exhausted. last structural error response: " + error.message, 'system-message');
                     }
                 }
             }
 
-            _0x44.disabled = false;
-            _0x55.disabled = false;
-            _0x44.focus();
+            userInputField.disabled = false;
+            sendMsgBtn.disabled = false;
+            userInputField.focus();
         }
 
-        function _0x3b(text, className) {
+        function appendNotificationBubble(text, className) {
             const notifyDiv = document.createElement('div');
             notifyDiv.className = className;
             notifyDiv.innerText = text;
-            _0x66.appendChild(notifyDiv);
-            _0x66.scrollTop = _0x66.scrollHeight;
+            chatMessagesBox.appendChild(notifyDiv);
+            chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
         }
 
-        function _0x4c(text, className, isAI = false) {
+        function appendMessageBubble(text, className, isAI = false) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = "_0x4d " + className;
+            messageDiv.className = "message-bubble " + className;
             messageDiv.innerText = text;
 
             if (isAI) {
@@ -602,8 +602,8 @@
                 messageDiv.appendChild(actionsDiv);
             }
 
-            _0x66.appendChild(messageDiv);
-            _0x66.scrollTop = _0x66.scrollHeight;
+            chatMessagesBox.appendChild(messageDiv);
+            chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
 
             if (window.MathJax && window.MathJax.typesetPromise) {
                 window.MathJax.typesetPromise([messageDiv]).catch((err) => console.log(err.message));
