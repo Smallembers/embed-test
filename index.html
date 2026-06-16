@@ -56,30 +56,6 @@
             display: block;
         }
 
-        .hidden-ui {
-            display: none !important;
-        }
-
-        #floating-reveal-btn {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            background-color: var(--bg-surface);
-            color: var(--text-muted);
-            border: 1px solid var(--border-focus);
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 9999;
-            display: none;
-        }
-        #floating-reveal-btn:hover {
-            color: #ffffff;
-            background-color: var(--accent-blue);
-            border-color: var(--accent-blue-hover);
-        }
-
         .header-panel {
             margin-bottom: 20px;
             display: flex;
@@ -107,18 +83,6 @@
         }
         .pip-trigger-btn:hover {
             background-color: var(--accent-green-hover);
-            transform: scale(1.05);
-        }
-        .hide-btn {
-            background-color: var(--border-focus);
-            color: white;
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 25px;
-        }
-        .hide-btn:hover {
-            background-color: #52525b;
             transform: scale(1.05);
         }
 
@@ -322,7 +286,6 @@
         <div class="header-panel">
             <div class="btn-group">
                 <button id="pip-button" class="pip-trigger-btn">⧉</button>
-                <button id="hide-ui-btn" class="hide-btn">✕ (`)</button>
             </div>
         </div>
 
@@ -343,8 +306,6 @@
         </div>
     </div>
 
-    <button id="floating-reveal-btn">◯</button>
-
     <script type="importmap">
       {
         "imports": {
@@ -357,8 +318,6 @@
         import { GoogleGenAI } from '@google/genai';
 
         const mainAppContainer = document.getElementById('main-app-container');
-        const hideUiBtn = document.getElementById('hide-ui-btn');
-        const floatingRevealBtn = document.getElementById('floating-reveal-btn');
         const chatWindowContainer = document.getElementById('chat-window-container');
         const pipButton = document.getElementById('pip-button');
         const newApiKeyInput = document.getElementById('newApiKey');
@@ -369,37 +328,11 @@
         let sendMsgBtn = document.getElementById('sendBtn');
         let chatMessagesBox = document.getElementById('chat-messages-box');
 
-        function toggleUserInterface() {
-            if (mainAppContainer.classList.contains('hidden-ui')) {
-                mainAppContainer.classList.remove('hidden-ui');
-                floatingRevealBtn.style.display = 'none';
-            } else {
-                mainAppContainer.classList.add('hidden-ui');
-                floatingRevealBtn.style.display = 'block';
-            }
-        }
-
-        hideUiBtn.onclick = (e) => {
-            e.stopPropagation();
-            toggleUserInterface();
-        };
-
-        floatingRevealBtn.onclick = (e) => {
-            e.stopPropagation();
-            toggleUserInterface();
-        };
-
         window.addEventListener('keydown', (e) => {
             if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
                 if (e.key === 'Escape') {
                     document.activeElement.blur();
                 }
-                return;
-            }
-
-            if (e.key === '`') {
-                e.preventDefault(); 
-                toggleUserInterface();
             }
         });
 
