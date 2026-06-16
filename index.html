@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Gem Workspace</title>
+    <title>Drive</title>
     
     <script>
         window.MathJax = {
@@ -22,11 +22,12 @@
 
     <style>
         :root {
-            --bg-base: #0f0f11;
-            --bg-surface: #18181c;
-            --bg-element: #222227;
-            --border-color: #2f2f37;
-            --text-main: #f1f1f4;
+            --bg-base: #121214;
+            --bg-surface: #1a1a1e;
+            --bg-element: #26262b;
+            --border-color: #2e2e34;
+            --border-focus: #3f3f46;
+            --text-main: #e3e3e3;
             --text-muted: #a1a1aa;
             --accent-blue: #2563eb;
             --accent-blue-hover: #3b82f6;
@@ -42,119 +43,113 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: var(--bg-base);
             color: var(--text-main);
-            max-width: 760px;
-            margin: 0 auto;
-            padding: 24px;
+            position: relative;
         }
 
         #main-app-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            display: block;
         }
 
         .hidden-ui {
             display: none !important;
         }
 
-        /* Header UI */
+        #floating-reveal-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background-color: var(--bg-surface);
+            color: var(--text-muted);
+            border: 1px solid var(--border-focus);
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 9999;
+            display: none;
+        }
+        #floating-reveal-btn:hover {
+            color: #ffffff;
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue-hover);
+        }
+
         .header-panel {
+            margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
+            justify-content: center;
         }
-
-        h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: -0.025em;
-        }
-
         .btn-group {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
-
+        
         button {
             font-family: inherit;
-            font-weight: 600;
-            font-size: 14px;
-            border: none;
-            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s, background-color 0.2s;
+            border: none;
         }
 
         .pip-trigger-btn {
             background-color: var(--accent-green);
-            color: #000000;
-            padding: 10px 18px;
+            color: white;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 25px;
         }
-
         .pip-trigger-btn:hover {
             background-color: var(--accent-green-hover);
-            transform: translateY(-1px);
+            transform: scale(1.05);
         }
-
         .hide-btn {
-            background-color: var(--bg-element);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 10px 18px;
+            background-color: var(--border-focus);
+            color: white;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 25px;
         }
-
         .hide-btn:hover {
-            background-color: var(--border-color);
+            background-color: #52525b;
+            transform: scale(1.05);
         }
 
-        /* Configuration Panel */
         .config-box {
             background: var(--bg-surface);
-            border: 1px solid var(--border-color);
+            padding: 15px;
             border-radius: 12px;
-            padding: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
         }
-
-        .config-box label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
         .key-input-group {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 12px;
         }
-
         .key-input-group input {
             flex-grow: 1;
-            background-color: var(--bg-base);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            padding: 10px;
+            background-color: var(--bg-element);
+            border: 1px solid var(--border-focus);
+            border-radius: 6px;
             color: #ffffff;
-            padding: 10px 14px;
             font-size: 14px;
         }
-
-        .key-input-group input:focus {
-            outline: 2px solid var(--accent-blue);
-            border-color: transparent;
-        }
-
         .key-input-group button {
             background-color: var(--accent-blue);
-            color: #ffffff;
-            padding: 0 16px;
+            color: white;
+            padding: 0 15px;
+            border-radius: 6px;
+            font-weight: bold;
         }
-
         .key-input-group button:hover {
             background-color: var(--accent-blue-hover);
         }
@@ -163,122 +158,126 @@
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
-
         .key-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--bg-base);
-            border: 1px solid var(--border-color);
+            background: var(--bg-element);
             padding: 8px 12px;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 13px;
-        }
-
-        .key-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-family: monospace;
+            border: 1px solid var(--border-focus);
         }
-
-        .badge {
-            font-family: -apple-system, system-ui, sans-serif;
-            font-size: 11px;
-            font-weight: 700;
+        .key-item .badge {
+            background-color: var(--border-focus);
             padding: 2px 6px;
             border-radius: 4px;
-            background-color: var(--bg-element);
-            color: var(--text-muted);
+            font-size: 11px;
+            margin-left: 6px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         }
-
-        .badge.primary {
-            background-color: rgba(29, 185, 84, 0.15);
-            color: var(--accent-green);
+        .key-item .badge.primary {
+            background-color: var(--accent-green);
+            color: black;
+            font-weight: bold;
         }
-
-        .delete-key-btn {
+        .key-item button {
             background: transparent;
             color: var(--accent-red);
             font-size: 12px;
-            padding: 4px 8px;
+            font-weight: bold;
         }
 
-        .delete-key-btn:hover {
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        /* Chat System Workspace */
         #chat-window-container {
             background: var(--bg-surface);
-            border: 1px solid var(--border-color);
+            padding: 20px;
             border-radius: 12px;
-            padding: 16px;
+            border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            height: 500px;
+            height: 450px;
+            transition: all 0.1s ease-in-out;
+            transform-origin: top left;
+        }
+
+        .pip-minimized-ui {
+            padding: 0 !important;
+            height: 0px !important;
+            width: 0px !important;
+            border: none !important;
+            background: transparent !important;
+            overflow: hidden !important;
+        }
+        .pip-minimized-ui #chat-messages-box,
+        .pip-minimized-ui .input-area {
+            display: none !important;
         }
 
         #chat-messages-box {
             flex-grow: 1;
-            background: var(--bg-base);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px;
+            background: var(--bg-base);
+            padding: 15px;
             overflow-y: auto;
-            margin-bottom: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
         }
-
         .message-bubble {
-            padding: 10px 14px;
-            border-radius: 12px;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
             max-width: 85%;
             word-wrap: break-word;
             line-height: 1.5;
-            font-size: 14.5px;
+            font-size: 15px;
             position: relative;
         }
-
         .user-message {
             background-color: var(--accent-blue);
             color: #ffffff;
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
         }
-
         .ai-message {
-            background-color: var(--bg-element);
+            background-color: var(--border-color);
             color: var(--text-main);
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
-            padding-bottom: 34px;
-            width: 100%;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            padding-bottom: 38px;
         }
-
+        
         .msg-actions {
             position: absolute;
             bottom: 6px;
             left: 12px;
+            display: flex;
+            gap: 8px;
         }
-
         .action-btn {
             background: var(--bg-surface);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-focus);
             color: var(--text-muted);
-            padding: 2px 8px;
+            padding: 3px 8px;
             font-size: 11px;
             border-radius: 4px;
         }
-
         .action-btn:hover {
             color: #ffffff;
+            border-color: var(--accent-blue-hover);
             background: var(--accent-blue);
-            border-color: transparent;
+        }
+
+        .system-message {
+            background-color: transparent;
+            color: var(--accent-red);
+            margin: 10px auto;
+            text-align: center;
+            font-size: 13px;
+            border-radius: 0;
+            max-width: 100%;
         }
 
         .fallback-warning {
@@ -289,77 +288,31 @@
             padding: 8px;
             border-radius: 6px;
             text-align: center;
-        }
-
-        .system-message {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--accent-red);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            font-size: 12px;
-            padding: 8px;
-            border-radius: 6px;
-            text-align: center;
+            margin-bottom: 15px;
         }
 
         .input-area {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
-
         .input-area input {
             flex-grow: 1;
+            padding: 14px;
             background-color: var(--bg-base);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: #ffffff;
-            padding: 12px 14px;
-            font-size: 14px;
+            font-size: 15px;
         }
-
-        .input-area input:focus {
-            outline: 2px solid var(--accent-blue);
-            border-color: transparent;
-        }
-
         .input-area button {
-            background-color: var(--accent-blue);
-            color: #ffffff;
-            padding: 0 20px;
-        }
-
-        .input-area button:hover {
-            background-color: var(--accent-blue-hover);
-        }
-
-        /* Floating Reveal HUD Mode Control */
-        #floating-reveal-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+            padding: 0 24px;
             background-color: var(--accent-blue);
             color: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            display: none;
-            z-index: 9999;
+            border-radius: 8px;
+            font-weight: 500;
         }
-
-        /* PiP Special States */
-        .pip-minimized-ui {
-            padding: 0 !important;
-            height: 100% !important;
-            justify-content: center;
-            align-items: center;
-        }
-        .pip-minimized-ui #chat-messages-box,
-        .pip-minimized-ui .input-area {
-            display: none !important;
-        }
-        .pip-minimized-ui::after {
-            content: "Workspace Minimized ( ` )";
-            font-size: 12px;
-            color: var(--text-muted);
+        .input-area button:hover {
+            background-color: var(--accent-blue-hover);
         }
     </style>
 </head>
@@ -367,18 +320,16 @@
 
     <div id="main-app-container">
         <div class="header-panel">
-            <h2>Interactive Gem</h2>
             <div class="btn-group">
-                <button id="pip-button" class="pip-trigger-btn">Pop Out Window</button>
-                <button id="hide-ui-btn" class="hide-btn">Hide View (`)</button>
+                <button id="pip-button" class="pip-trigger-btn">⧉</button>
+                <button id="hide-ui-btn" class="hide-btn">✕ (`)</button>
             </div>
         </div>
 
         <div class="config-box">
-            <label for="newApiKey">Gemini API Key Node Management</label>
             <div class="key-input-group">
-                <input type="password" id="newApiKey" placeholder="AIzaSy... authorization token">
-                <button id="addKeyBtn">Mount Key</button>
+                <input type="password" id="newApiKey" placeholder="AIzaSy...">
+                <button id="addKeyBtn">+</button>
             </div>
             <ul id="keyList" class="key-list"></ul>
         </div>
@@ -386,13 +337,13 @@
         <div id="chat-window-container" class="tex2jax_process">
             <div id="chat-messages-box"></div>
             <div class="input-area">
-                <input type="text" id="userInput" placeholder="Ask anything...">
-                <button id="sendBtn">Transmit</button>
+                <input type="text" id="userInput" placeholder="...">
+                <button id="sendBtn">➔</button>
             </div>
         </div>
     </div>
 
-    <button id="floating-reveal-btn">Restore System Interface</button>
+    <button id="floating-reveal-btn">◯</button>
 
     <script type="importmap">
       {
@@ -405,7 +356,6 @@
     <script type="module">
         import { GoogleGenAI } from '@google/genai';
 
-        // DOM elements
         const mainAppContainer = document.getElementById('main-app-container');
         const hideUiBtn = document.getElementById('hide-ui-btn');
         const floatingRevealBtn = document.getElementById('floating-reveal-btn');
@@ -415,41 +365,46 @@
         const addKeyBtn = document.getElementById('addKeyBtn');
         const keyListContainer = document.getElementById('keyList');
         
-        // Active Scope elements (can jump contexts between main window and PiP frame)
-        let currentInput, currentSendBtn, currentMessageBox;
-        
-        // Internal State Storage
-        let savedApiKeys = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
+        let userInputField = document.getElementById('userInput');
+        let sendMsgBtn = document.getElementById('sendBtn');
+        let chatMessagesBox = document.getElementById('chat-messages-box');
 
-        function syncActiveElementsScope(rootDOM) {
-            currentInput = rootDOM.getElementById('userInput');
-            currentSendBtn = rootDOM.getElementById('sendBtn');
-            currentMessageBox = rootDOM.getElementById('chat-messages-box');
-            setupInputLifecycle();
-        }
-        syncActiveElementsScope(document);
-
-        // Core visibility structural shifts
         function toggleUserInterface() {
-            const isHidden = mainAppContainer.classList.toggle('hidden-ui');
-            floatingRevealBtn.style.display = isHidden ? 'block' : 'none';
+            if (mainAppContainer.classList.contains('hidden-ui')) {
+                mainAppContainer.classList.remove('hidden-ui');
+                floatingRevealBtn.style.display = 'none';
+            } else {
+                mainAppContainer.classList.add('hidden-ui');
+                floatingRevealBtn.style.display = 'block';
+            }
         }
 
-        hideUiBtn.onclick = toggleUserInterface;
-        floatingRevealBtn.onclick = toggleUserInterface;
+        hideUiBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleUserInterface();
+        };
+
+        floatingRevealBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleUserInterface();
+        };
 
         window.addEventListener('keydown', (e) => {
-            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-                if (e.key === 'Escape') document.activeElement.blur();
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                if (e.key === 'Escape') {
+                    document.activeElement.blur();
+                }
                 return;
             }
+
             if (e.key === '`') {
-                e.preventDefault();
+                e.preventDefault(); 
                 toggleUserInterface();
             }
         });
 
-        // Local Storage Operations
+        let savedApiKeys = JSON.parse(localStorage.getItem('gemini_api_keys')) || [];
+
         function updateStorageAndList() {
             localStorage.setItem('gemini_api_keys', JSON.stringify(savedApiKeys));
             renderKeyList();
@@ -458,18 +413,18 @@
         function renderKeyList() {
             keyListContainer.innerHTML = '';
             if (savedApiKeys.length === 0) {
-                keyListContainer.innerHTML = `<li style="font-size:12px; color:var(--text-muted); text-align:center; padding: 4px;">No active validation engines found. Mount a local storage token.</li>`;
                 return;
             }
             savedApiKeys.forEach((key, index) => {
                 const li = document.createElement('li');
                 li.className = 'key-item';
-                const maskedKey = key.replace(/^(.{8}).*(.{4})$/, "$1...$2");
-                const badge = index === 0 ? '<span class="badge primary">Primary Node</span>' : `<span class="badge">Fallback [${index}]</span>`;
+                
+                const maskedKey = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+                const badgeText = index === 0 ? '<span class="badge primary">★</span>' : `<span class="badge">#${index}</span>`;
                 
                 li.innerHTML = `
-                    <div class="key-info">${maskedKey} ${badge}</div>
-                    <button data-index="${index}" class="delete-key-btn">Drop Module</button>
+                    <div>${maskedKey} ${badgeText}</div>
+                    <button data-index="${index}" class="delete-key-btn">✕</button>
                 `;
                 keyListContainer.appendChild(li);
             });
@@ -483,166 +438,178 @@
                     updateStorageAndList();
                     newApiKeyInput.value = '';
                 } else {
-                    alert("Resource identity collision: token exists.");
+                    alert("Key exists");
                 }
             }
         };
 
         keyListContainer.onclick = (e) => {
             if (e.target.classList.contains('delete-key-btn')) {
-                const targetIndex = parseInt(e.target.getAttribute('data-index'));
-                savedApiKeys.splice(targetIndex, 1);
+                const indexToRemove = parseInt(e.target.getAttribute('data-index'));
+                savedApiKeys.splice(indexToRemove, 1);
                 updateStorageAndList();
             }
         };
 
         renderKeyList();
 
-        // Chat Mechanics & Event Registration Pipeline
-        function setupInputLifecycle() {
-            currentInput.onkeypress = (e) => { if(e.key === 'Enter') handleMessageSubmit(); };
-            currentSendBtn.onclick = handleMessageSubmit;
+        function bindInputEvents(inputEl, btnEl) {
+            inputEl.onkeypress = (e) => { if(e.key === 'Enter') handleMessageSubmit(); };
+            btnEl.onclick = () => { handleMessageSubmit(); };
         }
+        bindInputEvents(userInputField, sendMsgBtn);
 
-        async function handleMessageSubmit() {
-            const prompt = currentInput.value.trim();
-            if (savedApiKeys.length === 0) {
-                alert("Operation blocked: terminal key registry is empty.");
-                return;
-            }
-            if (!prompt) return;
-
-            currentInput.value = '';
-            currentInput.disabled = true;
-            currentSendBtn.disabled = true;
-
-            appendMessageBubble(prompt, 'user-message');
-
-            let resolutionSuccess = false;
-            
-            for (let i = 0; i < savedApiKeys.length; i++) {
-                try {
-                    if (i > 0) {
-                        appendNotificationBubble(`Primary key rejected execution. Scaling down fallback array directly via Route Node [${i}]...`, 'fallback-warning');
-                    }
-
-                    const client = new GoogleGenAI({ apiKey: savedApiKeys[i] });
-                    const response = await client.models.generateContent({
-                        model: 'gemini-2.5-flash',
-                        contents: prompt,
-                    });
-
-                    appendMessageBubble(response.text, 'ai-message', true);
-                    resolutionSuccess = true;
-                    break;
-                } catch (err) {
-                    console.error(`Execution fault at key scope [${i}]: `, err.message);
-                    if (i === savedApiKeys.length - 1 && !resolutionSuccess) {
-                        appendMessageBubble(`Terminal System Exception: All registration keys completely exhausted. Internal pipeline telemetry message: ${err.message}`, 'system-message');
-                    }
-                }
-            }
-
-            currentInput.disabled = false;
-            currentSendBtn.disabled = false;
-            currentInput.focus();
-        }
-
-        function appendNotificationBubble(text, className) {
-            const container = document.createElement('div');
-            container.className = className;
-            container.innerText = text;
-            currentMessageBox.appendChild(container);
-            currentMessageBox.scrollTop = currentMessageBox.scrollHeight;
-        }
-
-        function appendMessageBubble(text, className, isAI = false) {
-            const bubble = document.createElement('div');
-            bubble.className = `message-bubble ${className}`;
-            bubble.innerText = text;
-
-            if (isAI) {
-                const actionGroup = document.createElement('div');
-                actionGroup.className = 'msg-actions';
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'action-btn';
-                copyBtn.innerText = 'Copy String';
-                copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(text);
-                    copyBtn.innerText = 'Copied!';
-                    setTimeout(() => copyBtn.innerText = 'Copy String', 2000);
-                };
-                actionGroup.appendChild(copyBtn);
-                bubble.appendChild(actionGroup);
-            }
-
-            currentMessageBox.appendChild(bubble);
-            currentMessageBox.scrollTop = currentMessageBox.scrollHeight;
-
-            if (window.MathJax?.typesetPromise) {
-                window.MathJax.typesetPromise([bubble]).catch(err => console.log("MathJax Render Fail: ", err.message));
-            }
-        }
-
-        // Advanced Document Picture-In-Picture Mechanics
         pipButton.addEventListener('click', async () => {
             if (!('documentPictureInPicture' in window)) {
-                alert("Runtime Environment Restriction: Document Picture-In-Picture layout framework missing.");
+                alert("PiP not supported.");
                 return;
             }
 
             try {
                 const pipWindow = await window.documentPictureInPicture.requestWindow({
-                    width: 460,
-                    height: 520,
+                    width: 450,
+                    height: 500,
                 });
 
-                // Inherit execution stylesheet rules natively
-                [...document.styleSheets].forEach((sheet) => {
+                ([...document.styleSheets]).forEach((styleSheet) => {
                     try {
-                        const rules = [...sheet.cssRules].map(r => r.cssText).join('');
-                        const styleNode = document.createElement('style');
-                        styleNode.textContent = rules;
-                        pipWindow.document.head.appendChild(styleNode);
-                    } catch (e) { /* Bypass cross-origin stylesheet errors */ }
+                        const cssSource = ([...styleSheet.cssRules]).map((rule) => rule.cssText).join('');
+                        const style = document.createElement('style');
+                        style.textContent = cssSource;
+                        pipWindow.document.head.appendChild(style);
+                    } catch (e) {}
                 });
 
-                // Transfer live engine container node to PiP context tree
                 pipWindow.document.body.appendChild(chatWindowContainer);
-                syncActiveElementsScope(pipWindow.document);
+
+                userInputField = pipWindow.document.getElementById('userInput');
+                sendMsgBtn = pipWindow.document.getElementById('sendBtn');
+                chatMessagesBox = pipWindow.document.getElementById('chat-messages-box');
+                bindInputEvents(userInputField, sendMsgBtn);
 
                 let isMinimized = false;
 
                 pipWindow.addEventListener('keydown', (e) => {
-                    if (['INPUT', 'TEXTAREA'].includes(pipWindow.document.activeElement.tagName)) {
-                        if (e.key === 'Escape') pipWindow.document.activeElement.blur();
+                    if (pipWindow.document.activeElement.tagName === 'INPUT' || pipWindow.document.activeElement.tagName === 'TEXTAREA') {
+                        if (e.key === 'Escape') {
+                            pipWindow.document.activeElement.blur();
+                        }
                         return;
                     }
 
                     if (e.key === '`') {
                         e.preventDefault();
                         isMinimized = !isMinimized;
+
                         if (isMinimized) {
                             chatWindowContainer.classList.add('pip-minimized-ui');
-                            pipWindow.resizeTo(260, 60);
+                            pipWindow.resizeTo(100, 40);
                         } else {
+                            pipWindow.resizeTo(450, 500);
                             chatWindowContainer.classList.remove('pip-minimized-ui');
-                            pipWindow.resizeTo(460, 520);
                         }
                     }
                 });
 
-                // Detach handling gracefully and return to standard app display
-                pipWindow.addEventListener("pagehide", () => {
+                pipWindow.addEventListener("pagehide", (event) => {
                     chatWindowContainer.classList.remove('pip-minimized-ui');
                     mainAppContainer.appendChild(chatWindowContainer);
-                    syncActiveElementsScope(document);
+                    userInputField = document.getElementById('userInput');
+                    sendMsgBtn = document.getElementById('sendBtn');
+                    chatMessagesBox = document.getElementById('chat-messages-box');
+                    bindInputEvents(userInputField, sendMsgBtn);
                 });
 
             } catch (error) {
-                console.error("PiP Window instantiation engine error: ", error);
+                console.error("PiP failed: ", error);
             }
         });
+
+        async function handleMessageSubmit() {
+            const rawTxt = userInputField.value.trim();
+
+            if (savedApiKeys.length === 0) {
+                alert("Add key.");
+                return;
+            }
+            if (!rawTxt) return;
+
+            userInputField.value = '';
+            userInputField.disabled = true;
+            sendMsgBtn.disabled = true;
+
+            appendMessageBubble(rawTxt, 'user-message');
+
+            let success = false;
+            
+            for (let i = 0; i < savedApiKeys.length; i++) {
+                const activeKey = savedApiKeys[i];
+                
+                try {
+                    if (i > 0) {
+                        appendNotificationBubble("Fallback #" + i + "...", 'fallback-warning');
+                    }
+
+                    const ai = new GoogleGenAI({ apiKey: activeKey });
+                    
+                    const response = await ai.models.generateContent({
+                        model: 'gemini-2.5-flash',
+                        contents: rawTxt,
+                    });
+
+                    appendMessageBubble(response.text, 'ai-message', true);
+                    success = true;
+                    break;
+                    
+                } catch (error) {
+                    console.warn("Key position index " + i + " failed: ", error.message);
+                    if (i === savedApiKeys.length - 1 && !success) {
+                        appendMessageBubble("Error: " + error.message, 'system-message');
+                    }
+                }
+            }
+
+            userInputField.disabled = false;
+            sendMsgBtn.disabled = false;
+            userInputField.focus();
+        }
+
+        function appendNotificationBubble(text, className) {
+            const notifyDiv = document.createElement('div');
+            notifyDiv.className = className;
+            notifyDiv.innerText = text;
+            chatMessagesBox.appendChild(notifyDiv);
+            chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+        }
+
+        function appendMessageBubble(text, className, isAI = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = "message-bubble " + className;
+            messageDiv.innerText = text;
+
+            if (isAI) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'msg-actions';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'action-btn';
+                copyBtn.innerText = '📋';
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(text);
+                    copyBtn.innerText = '✓';
+                    setTimeout(() => copyBtn.innerText = '📋', 2000);
+                };
+                actionsDiv.appendChild(copyBtn);
+                messageDiv.appendChild(actionsDiv);
+            }
+
+            chatMessagesBox.appendChild(messageDiv);
+            chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([messageDiv]).catch((err) => console.log(err.message));
+            }
+        }
     </script>
 </body>
 </html>
